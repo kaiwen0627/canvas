@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
+        #myCanvas {
+            display: block;
+            background-color: #000000;
+        }
+    </style>
+</head>
+<body>
+<canvas id="myCanvas"></canvas>
+<script>
+    var canvas = document.getElementById("myCanvas");
+    var ctx = canvas.getContext("2d");
+    var w = canvas.width = window.innerWidth;
+    var h = canvas.height = window.innerHeight;
+
+    var num = 200;
+    var mouse = {};
+    window.onresize = function () {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+    }
+
+    document.onmousemove = function (e) {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+//        console.log(mouse.x);
+    }
+
+    /*生成点个数*/
+    var data = [];
+    /*存第一次绘制的点坐标*/
+
+
+    for (var i = 0; i < num; i++) {              /*生成num个点*/
+//        console.log(i)
+        data[i] = {x: Math.random() * w, y: Math.random() * h, mx: Math.random() * 1 - 0.5, my: Math.random() * 1 - 0.5}
+//        var x = Math.random() * w;
+//        var y = Math.random() * h;
+        var x = data[i].x;
+        var y = data[i].y;
+        drawyuan(x, y);
+    }
+
+    //画点函数
+    function drawyuan(x, y) {
+        ctx.save();
+        ctx.fillStyle = '#f3f3f3';
+        ctx.beginPath();
+        ctx.arc(x, y, 0.5, 0, Math.PI * 2, false);
+//        ctx.rect(x,y,10,10);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+    }
+
+    !function draw() {
+        ctx.clearRect(0, 0, w, h);
+        for (var i = 0; i < num; i++) {
+            data[i].x += data[i].mx;
+            data[i].y += data[i].my;
+            if (data[i].x > w || data[i].x < 0) {
+                data[i].mx = -data[i].mx;
+            }
+            if (data[i].y > h || data[i].y < 0) {
+                data[i].my = -data[i].my;
+            }
+//            if(data[i].x<0){
+//                data[i].mx=-data[i].mx;
+//            }
+            for (var j = 0; j < num; j++) {     /*连线*/
+                var s1 = data[i].x - data[j].x;
+                var s2 = data[i].y - data[j].y;
+                var s = Math.sqrt(s1 * s1 + s2 * s2);
+                /*开方*/
+                if (s < 50) {
+                    drawLine(data[i].x, data[i].y, data[j].x, data[j].y, false);
+                }
+                if (mouse.x) {
+                    if ((mouse.x - data[j].x) * (mouse.x - data[j].x) + (mouse.y - data[j].y) * (mouse.y - data[j].y) < 100 * 100) {
+                        drawLine(mouse.x, mouse.y, data[j].x, data[j].y, true);
+
+                    }
+                }
+
+            }
+            drawyuan(data[i].x, data[i].y);
+        }
+        window.requestAnimationFrame(draw);
+        /*回调函数再执行*/
+    }();
+
+
+    /*划线*/
+    function drawLine(x1, y1, x2, y2, ismouse) {
+        ctx.lineWidth = 0.5;
+        var line = ctx.createLinearGradient(x1, y1, x2, y2);
+        if (ismouse) {
+            line.addColorStop(0, '#040fff');
+            line.addColorStop(1, '#00fffc')
+        } else {
+            line.addColorStop(0, '#1595ff');
+            line.addColorStop(1, '#ff0298')
+        }
+
+        ctx.save();
+        ctx.strokeStyle = line;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+        ctx.restore();
+    }
+</script>
+</body>
+</html>
